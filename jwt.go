@@ -1,8 +1,8 @@
 package p_jwt
 
 import (
-	"gitee.com/pefish/p-go-error"
 	"github.com/dgrijalva/jwt-go"
+	"github.com/pefish/go-error"
 	"time"
 )
 
