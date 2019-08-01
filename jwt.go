@@ -1,4 +1,4 @@
-package p_jwt
+package go_jwt
 
 import (
 	"github.com/dgrijalva/jwt-go"
@@ -21,7 +21,7 @@ func (this *JwtClass) GetJwt(privKey string, expireDuration time.Duration, paylo
 	token.Claims = claims
 	tokenString, err := token.SignedString(signKey)
 	if err != nil {
-		p_error.ThrowError(`jwt generate error`, 0, err)
+		go_error.ThrowError(`jwt generate error`, 0, err)
 	}
 	return tokenString
 }
@@ -35,7 +35,7 @@ func (this *JwtClass) VerifyJwt(pubKey string, tokenStr string) bool {
 		return verifyKey, nil
 	})
 	if err != nil {
-		p_error.ThrowInternal(`jwt verify error`)
+		go_error.ThrowInternal(`jwt verify error`)
 	}
 	return token.Valid
 }

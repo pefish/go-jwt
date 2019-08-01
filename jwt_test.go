@@ -1,4 +1,4 @@
-package p_jwt
+package go_jwt
 
 import (
 	"fmt"
