@@ -40,6 +40,23 @@ func (this *JwtClass) VerifyJwt(pubKey string, tokenStr string) bool {
 	return token.Valid
 }
 
+func (this *JwtClass) VerifyJwtSkipClaimsValidation(pubKey string, tokenStr string) bool {
+	parser := jwt.Parser{
+		SkipClaimsValidation: true,
+	}
+	token, err := parser.Parse(tokenStr, func(token *jwt.Token) (interface{}, error) {
+		verifyKey, err := jwt.ParseRSAPublicKeyFromPEM([]byte(pubKey))
+		if err != nil {
+			return nil, err
+		}
+		return verifyKey, nil
+	})
+	if err != nil {
+		go_error.ThrowInternal(`jwt verify error`)
+	}
+	return token.Valid
+}
+
 func (this *JwtClass) DecodeBodyOfJwt(tokenStr string) map[string]interface{} {
 	claims := jwt.MapClaims{}
 	jwt.ParseWithClaims(tokenStr, claims, nil)
