@@ -60,7 +60,7 @@ func (this *JwtClass) DecodeBodyOfJwt(tokenStr string) map[string]interface{} {
 	claims := jwt.MapClaims{}
 	_, err := jwt.ParseWithClaims(tokenStr, claims, nil)
 	if err != nil {
-		panic(err)
+		//panic(err)
 	}
 	return claims
 }

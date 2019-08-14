@@ -17,3 +17,8 @@ func TestJwtClass_GetJwt(t *testing.T) {
 6 * time.Hour, nil)
 	fmt.Println(a)
 }
+
+func TestJwtClass_DecodePayloadOfJwtBody(t *testing.T) {
+	a := Jwt.DecodePayloadOfJwtBody("eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE1NjY4NDE1MTQsImlhdCI6MTU2NTM0MTUxNCwicGF5bG9hZCI6eyJ1c2VyX2lkIjoxMTAyMjI0fX0.g4vii9CF4VkYXxiKXqOGNIayKVBg5-frr5dNisgDaRrIVIrHgiH51KBY8Hyajz08EHws7kiV0jG4mxUO6MPLIS9pzbhHHYm2OpFD9YCsNPIcj53jDvDW8p_sS0myxsivYqGrcb9pqKUTqu51Zz9JtMU6HPWRZNeYySFAL1hV_KlRGclS7ErUJBx3z9WOk1Rqs1Xqdkf3ttSkMEJHCKeXMdkHGUR1c6xylygCTfBDOeGQeVT29FUdiQ4BadDik0l_xBDV_jCIfRD1OptTWUn_0cqm7n3qWoN-N_z5ZIj3D8EAlnQY2_wvo98bCCOPl2SD0yf2IAW8x_em42cIyDbciA")
+	fmt.Println(a)
+}
