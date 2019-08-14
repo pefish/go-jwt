@@ -2,7 +2,6 @@ package go_jwt
 
 import (
 	"github.com/dgrijalva/jwt-go"
-	"github.com/pefish/go-error"
 	"time"
 )
 
@@ -21,7 +20,7 @@ func (this *JwtClass) GetJwt(privKey string, expireDuration time.Duration, paylo
 	token.Claims = claims
 	tokenString, err := token.SignedString(signKey)
 	if err != nil {
-		go_error.ThrowError(`jwt generate error`, 0, err)
+		panic(err)
 	}
 	return tokenString
 }
@@ -35,7 +34,7 @@ func (this *JwtClass) VerifyJwt(pubKey string, tokenStr string) bool {
 		return verifyKey, nil
 	})
 	if err != nil {
-		go_error.ThrowInternal(`jwt verify error`)
+		panic(err)
 	}
 	return token.Valid
 }
@@ -52,19 +51,20 @@ func (this *JwtClass) VerifyJwtSkipClaimsValidation(pubKey string, tokenStr stri
 		return verifyKey, nil
 	})
 	if err != nil {
-		go_error.ThrowInternal(`jwt verify error`)
+		panic(err)
 	}
 	return token.Valid
 }
 
 func (this *JwtClass) DecodeBodyOfJwt(tokenStr string) map[string]interface{} {
 	claims := jwt.MapClaims{}
-	jwt.ParseWithClaims(tokenStr, claims, nil)
+	_, err := jwt.ParseWithClaims(tokenStr, claims, nil)
+	if err != nil {
+		panic(err)
+	}
 	return claims
 }
 
 func (this *JwtClass) DecodePayloadOfJwtBody(tokenStr string) map[string]interface{} {
-	claims := jwt.MapClaims{}
-	jwt.ParseWithClaims(tokenStr, claims, nil)
-	return claims[`payload`].(map[string]interface{})
+	return this.DecodeBodyOfJwt(tokenStr)[`payload`].(map[string]interface{})
 }
