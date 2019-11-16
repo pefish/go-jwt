@@ -82,7 +82,8 @@ func (this *JwtClass) MustVerifyJwtSkipClaimsValidation(pubKey string, tokenStr 
 
 func (this *JwtClass) DecodeBodyOfJwt(tokenStr string) (map[string]interface{}, error) {
 	claims := jwt.MapClaims{}
-	_, err := jwt.ParseWithClaims(tokenStr, claims, nil)
+	parser := jwt.Parser{}
+	_, _, err := parser.ParseUnverified(tokenStr, claims)
 	if err != nil {
 		return nil, err
 	}
