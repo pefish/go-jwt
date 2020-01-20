@@ -33,7 +33,7 @@ func (this *JwtClass) MustGetJwt(privKey string, expireDuration time.Duration, p
 	return tokenString
 }
 
-func (this *JwtClass) VerifyJwt(pubKey string, tokenStr string) (bool, error) {
+func (this *JwtClass) VerifyJwt(pubKey string, tokenStr string) (bool, *jwt.Token, error) {
 	token, err := jwt.Parse(tokenStr, func(token *jwt.Token) (interface{}, error) {
 		verifyKey, err := jwt.ParseRSAPublicKeyFromPEM([]byte(pubKey))
 		if err != nil {
@@ -42,20 +42,20 @@ func (this *JwtClass) VerifyJwt(pubKey string, tokenStr string) (bool, error) {
 		return verifyKey, nil
 	})
 	if err != nil {
-		return false, err
+		return false, nil, err
 	}
-	return token.Valid, nil
+	return token.Valid, token, nil
 }
 
-func (this *JwtClass) MustVerifyJwt(pubKey string, tokenStr string) bool {
-	valid, err := this.VerifyJwt(pubKey, tokenStr)
+func (this *JwtClass) MustVerifyJwt(pubKey string, tokenStr string) (bool, *jwt.Token) {
+	valid, token, err := this.VerifyJwt(pubKey, tokenStr)
 	if err != nil {
 		panic(err)
 	}
-	return valid
+	return valid, token
 }
 
-func (this *JwtClass) VerifyJwtSkipClaimsValidation(pubKey string, tokenStr string) (bool, error) {
+func (this *JwtClass) VerifyJwtSkipClaimsValidation(pubKey string, tokenStr string) (bool, *jwt.Token, error) {
 	parser := jwt.Parser{
 		SkipClaimsValidation: true,
 	}
@@ -67,37 +67,33 @@ func (this *JwtClass) VerifyJwtSkipClaimsValidation(pubKey string, tokenStr stri
 		return verifyKey, nil
 	})
 	if err != nil {
-		return false, err
+		return false, nil, err
 	}
-	return token.Valid, nil
+	return token.Valid, token, nil
 }
 
-func (this *JwtClass) MustVerifyJwtSkipClaimsValidation(pubKey string, tokenStr string) bool {
-	valid, err := this.VerifyJwtSkipClaimsValidation(pubKey, tokenStr)
+func (this *JwtClass) MustVerifyJwtSkipClaimsValidation(pubKey string, tokenStr string) (bool, *jwt.Token) {
+	valid, token, err := this.VerifyJwtSkipClaimsValidation(pubKey, tokenStr)
 	if err != nil {
 		panic(err)
 	}
-	return valid
+	return valid, token
 }
 
-func (this *JwtClass) DecodeBodyOfJwt(tokenStr string) (map[string]interface{}, error) {
+func (this *JwtClass) DecodeBodyOfJwt(tokenStr string) (map[string]interface{}, *jwt.Token, error) {
 	claims := jwt.MapClaims{}
 	parser := jwt.Parser{}
-	_, _, err := parser.ParseUnverified(tokenStr, claims)
+	token, _, err := parser.ParseUnverified(tokenStr, claims)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
-	return claims, nil
+	return claims, token, nil
 }
 
-func (this *JwtClass) MustDecodeBodyOfJwt(tokenStr string) map[string]interface{} {
-	result, err := this.DecodeBodyOfJwt(tokenStr)
+func (this *JwtClass) MustDecodeBodyOfJwt(tokenStr string) (map[string]interface{}, *jwt.Token) {
+	result, token, err := this.DecodeBodyOfJwt(tokenStr)
 	if err != nil {
 		panic(err)
 	}
-	return result
-}
-
-func (this *JwtClass) MustDecodePayloadOfJwtBody(tokenStr string) map[string]interface{} {
-	return this.MustDecodeBodyOfJwt(tokenStr)[`payload`].(map[string]interface{})
+	return result, token
 }
