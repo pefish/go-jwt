@@ -33,31 +33,9 @@ func (this *JwtClass) MustGetJwt(privKey string, expireDuration time.Duration, p
 	return tokenString
 }
 
-func (this *JwtClass) VerifyJwt(pubKey string, tokenStr string) (bool, *jwt.Token, error) {
-	token, err := jwt.Parse(tokenStr, func(token *jwt.Token) (interface{}, error) {
-		verifyKey, err := jwt.ParseRSAPublicKeyFromPEM([]byte(pubKey))
-		if err != nil {
-			return nil, err
-		}
-		return verifyKey, nil
-	})
-	if err != nil {
-		return false, nil, err
-	}
-	return token.Valid, token, nil
-}
-
-func (this *JwtClass) MustVerifyJwt(pubKey string, tokenStr string) (bool, *jwt.Token) {
-	valid, token, err := this.VerifyJwt(pubKey, tokenStr)
-	if err != nil {
-		panic(err)
-	}
-	return valid, token
-}
-
-func (this *JwtClass) VerifyJwtSkipClaimsValidation(pubKey string, tokenStr string) (bool, *jwt.Token, error) {
+func (this *JwtClass) VerifyJwt(pubKey string, tokenStr string, skipClaimsValidation bool) (bool, *jwt.Token, error) {
 	parser := jwt.Parser{
-		SkipClaimsValidation: true,
+		SkipClaimsValidation: skipClaimsValidation,
 	}
 	token, err := parser.Parse(tokenStr, func(token *jwt.Token) (interface{}, error) {
 		verifyKey, err := jwt.ParseRSAPublicKeyFromPEM([]byte(pubKey))
@@ -72,8 +50,8 @@ func (this *JwtClass) VerifyJwtSkipClaimsValidation(pubKey string, tokenStr stri
 	return token.Valid, token, nil
 }
 
-func (this *JwtClass) MustVerifyJwtSkipClaimsValidation(pubKey string, tokenStr string) (bool, *jwt.Token) {
-	valid, token, err := this.VerifyJwtSkipClaimsValidation(pubKey, tokenStr)
+func (this *JwtClass) MustVerifyJwt(pubKey string, tokenStr string, skipClaimsValidation bool) (bool, *jwt.Token) {
+	valid, token, err := this.VerifyJwt(pubKey, tokenStr, skipClaimsValidation)
 	if err != nil {
 		panic(err)
 	}
