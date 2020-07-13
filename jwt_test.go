@@ -7,12 +7,16 @@ import (
 )
 
 func TestJwtClass_VerifyJwt(t *testing.T) {
+	pkey, pubkey, err := GeneRsaKeyPair()
+	test.Equal(t, nil, err)
+	jwt, err := Jwt.GetJwt(pkey, 60 * time.Second, nil)
+	test.Equal(t, nil, err)
 	b, _, err := Jwt.VerifyJwt(
-		"-----BEGIN PUBLIC KEY-----\nMIICIjANBgkqhkiG9w0BAQEFAAOCAg8AMIICCgKCAgEAn9i2WBjHUUcy7BrQXz3I\nHuZryHVZlTV+nraIz8FalSrByF9RWFKMFn3FJi53MP5JlMQp4u/m3QmNtZwOli8i\nKDjLf78X8tJX4Z2SmolNNYMq11lIfC90NQ+ZGebGU4GpvRTnO79cPGfmaKj1Q+GM\nd8SiFrSwwD8DHU7Idr8NWLlviAMsrwTs9d5w0Z58ty65Nc9pqRA6ZEIuuLzqTCR9\n1sf45dxPDL9j1d3slWnkLi8SU+V3DHSJvV3v8Ll7bHQiSwmQ90WUAVyE9i2RpSE+\nO1LNqnaRZPTF/OaYP45CiR0vODdogt1OeZYmhE2weDTwvjA8qAO/WiGRxO5l2Sf1\neIuxFpnHon1e+DN0Qg6wD5+npnttnO9ORaSW56cJFFDf5pePd5jIMLOHzmbT39a6\nWn0l4DzsISU4/2sfAyu8PZu8lQ572C+RF8UXaQ3ip7V5RlgB2drxzPDOnMCrjwR7\nWMTzCAz/SIBa0ONKDy35RLYmXHinTu1iHOAX/cvmJq24Uq/LrjHT+hkbEPVkz0cC\nMNhzHyPh0pPBJH+EXu9GQanWK9eCZb+2o9DD4cjub5V52xAgAHJIQrg8Ml7JYNx1\nhQRUkQacQXK71tmXiKbEq8v3xQcYy6ggd2DXDiyTV/N4lbZ3ttBxjR0J719UkvsF\nqdKAUt15Zs4vb0/viEF5nScCAwEAAQ==\n-----END PUBLIC KEY-----",
-		`eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE1NTE5ODU3NjQsImlhdCI6MTU1MTk2NDE2NCwicGF5bG9hZCI6bnVsbH0.maQFKzl8R2ECfvXvEumOC-ofFVkTKu95ZvNURuZ6-K3CHAvxHEyeWjRsYZI2qD0XQbI0RTCMjpED8pd1vRnzRZWhFmaG0lZJYzwtlD6hjWfyNj1vGfoTYGPGFY7IaI4sWyq07RRWneq9C6B4CgniT5CFlKsktQm4kmzZGuStnpqJnA23prDmNCuVy4uAAdnKvABjVGBLtwB08eU_jmc2Nks3hW1NtPsOmyb4MCjRdqDDfRIz3VUYWPCCKK2AFdCZylfft9G2cQ3p92byH-143IRqwOlqA8k5CMh9d_UX8TmL3qaRaqlaXhFtB0y761XPuQpMSJNQC4A_wF-xABbYgW5E4QekZ4lXft3SIa_mPVgmRI8xbCXCzoz7snsdcZ5549mZNF02AqcDdhbS0IU6cb56AuefHtgU6K_DTNnsvNLUUv2y_a7JnvkrXd9iWOaaZa9vOdLn61eAIUIKc4uW0r2YszXu-VyCnvEVqvo0wnf6V4YTwd6r4WpS7zsK1jGZvZx_BN9CKr4CKXiKpFIH8k6ENgc0qvTDDd1xdqIlAFlKQ5LkU9UwqWZ-WTqXv4RySBWGeeBPfwrKuseqmAU9uIUOx2bjHeiQMrct6lleA6sQ2QJhg3Szo5Z9OqVtUAouhiL9y0wrJJaVnk4og11VALClrmsnnEes-3FeMcQXvaU`,
+		pubkey,
+		jwt,
 		false)
-	test.Equal(t, false, b)
-	test.Equal(t, "Token is expired", err.Error())
+	test.Equal(t, true, b)
+	test.Equal(t, nil, err)
 }
 
 func TestJwtClass_GetJwt(t *testing.T) {
@@ -21,3 +25,9 @@ func TestJwtClass_GetJwt(t *testing.T) {
 	test.Equal(t, true, len(a) > 100)
 }
 
+func TestGeneRsaKeyPair(t *testing.T) {
+	pkey, pubkey, err := GeneRsaKeyPair()
+	test.Equal(t, nil, err)
+	test.Equal(t, true, len(pkey) > 100)
+	test.Equal(t, true, len(pubkey) > 100)
+}

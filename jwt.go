@@ -1,6 +1,11 @@
 package go_jwt
 
 import (
+	"bytes"
+	"crypto/rand"
+	"crypto/rsa"
+	"crypto/x509"
+	"encoding/pem"
 	"github.com/dgrijalva/jwt-go"
 	"time"
 )
@@ -10,7 +15,7 @@ type JwtClass struct {
 
 var Jwt = JwtClass{}
 
-func (this *JwtClass) GetJwt(privKey string, expireDuration time.Duration, payload map[string]interface{}) (string, error) {
+func (jwtInstance *JwtClass) GetJwt(privKey string, expireDuration time.Duration, payload map[string]interface{}) (string, error) {
 	token := jwt.New(jwt.GetSigningMethod("RS256"))
 	signKey, err := jwt.ParseRSAPrivateKeyFromPEM([]byte(privKey))
 	claims := make(jwt.MapClaims)
@@ -25,15 +30,15 @@ func (this *JwtClass) GetJwt(privKey string, expireDuration time.Duration, paylo
 	return tokenString, nil
 }
 
-func (this *JwtClass) MustGetJwt(privKey string, expireDuration time.Duration, payload map[string]interface{}) string {
-	tokenString, err := this.GetJwt(privKey, expireDuration, payload)
+func (jwtInstance *JwtClass) MustGetJwt(privKey string, expireDuration time.Duration, payload map[string]interface{}) string {
+	tokenString, err := jwtInstance.GetJwt(privKey, expireDuration, payload)
 	if err != nil {
 		panic(err)
 	}
 	return tokenString
 }
 
-func (this *JwtClass) VerifyJwt(pubKey string, tokenStr string, skipClaimsValidation bool) (bool, *jwt.Token, error) {
+func (jwtInstance *JwtClass) VerifyJwt(pubKey string, tokenStr string, skipClaimsValidation bool) (bool, *jwt.Token, error) {
 	parser := jwt.Parser{
 		SkipClaimsValidation: skipClaimsValidation,
 	}
@@ -50,15 +55,15 @@ func (this *JwtClass) VerifyJwt(pubKey string, tokenStr string, skipClaimsValida
 	return token.Valid, token, nil
 }
 
-func (this *JwtClass) MustVerifyJwt(pubKey string, tokenStr string, skipClaimsValidation bool) (bool, *jwt.Token) {
-	valid, token, err := this.VerifyJwt(pubKey, tokenStr, skipClaimsValidation)
+func (jwtInstance *JwtClass) MustVerifyJwt(pubKey string, tokenStr string, skipClaimsValidation bool) (bool, *jwt.Token) {
+	valid, token, err := jwtInstance.VerifyJwt(pubKey, tokenStr, skipClaimsValidation)
 	if err != nil {
 		panic(err)
 	}
 	return valid, token
 }
 
-func (this *JwtClass) DecodeBodyOfJwt(tokenStr string) (map[string]interface{}, *jwt.Token, error) {
+func (jwtInstance *JwtClass) DecodeBodyOfJwt(tokenStr string) (map[string]interface{}, *jwt.Token, error) {
 	claims := jwt.MapClaims{}
 	parser := jwt.Parser{}
 	token, _, err := parser.ParseUnverified(tokenStr, claims)
@@ -68,10 +73,41 @@ func (this *JwtClass) DecodeBodyOfJwt(tokenStr string) (map[string]interface{}, 
 	return claims, token, nil
 }
 
-func (this *JwtClass) MustDecodeBodyOfJwt(tokenStr string) (map[string]interface{}, *jwt.Token) {
-	result, token, err := this.DecodeBodyOfJwt(tokenStr)
+func (jwtInstance *JwtClass) MustDecodeBodyOfJwt(tokenStr string) (map[string]interface{}, *jwt.Token) {
+	result, token, err := jwtInstance.DecodeBodyOfJwt(tokenStr)
 	if err != nil {
 		panic(err)
 	}
 	return result, token
+}
+
+func GeneRsaKeyPair() (string, string, error) {
+	bits := 2048
+	privateKey, err := rsa.GenerateKey(rand.Reader, bits)
+	derStream := x509.MarshalPKCS1PrivateKey(privateKey)
+	block := &pem.Block{
+		Type:  "RSA PRIVATE KEY",
+		Bytes: derStream,
+	}
+	privBuffer := new(bytes.Buffer)
+	err = pem.Encode(privBuffer, block)
+	if err != nil {
+		return "", "", err
+	}
+	// 生成公钥文件
+	publicKey := &privateKey.PublicKey
+	derPkix, err := x509.MarshalPKIXPublicKey(publicKey)
+	if err != nil {
+		return "", "", err
+	}
+	block = &pem.Block{
+		Type:  "PUBLIC KEY",
+		Bytes: derPkix,
+	}
+	pubBuffer := new(bytes.Buffer)
+	err = pem.Encode(pubBuffer, block)
+	if err != nil {
+		return "", "", err
+	}
+	return privBuffer.String(), pubBuffer.String(), nil
 }
