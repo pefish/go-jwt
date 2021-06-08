@@ -18,6 +18,9 @@ var Jwt = JwtClass{}
 func (jwtInstance *JwtClass) GetJwt(privKey string, expireDuration time.Duration, payload map[string]interface{}) (string, error) {
 	token := jwt.New(jwt.GetSigningMethod("RS256"))
 	signKey, err := jwt.ParseRSAPrivateKeyFromPEM([]byte(privKey))
+	if err != nil {
+		return ``, err
+	}
 	claims := make(jwt.MapClaims)
 	claims["exp"] = time.Now().Add(expireDuration).Unix()
 	claims["iat"] = time.Now().Unix() // 颁发时间

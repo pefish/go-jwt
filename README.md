@@ -7,6 +7,6 @@ jwt tools
 ## generate key
 
 ```shell
-openssl genpkey -algorithm RSA -out jwt_privkey.pem -pkeyopt rsa_keygen_bits:2048
-openssl rsa -pubout -in jwt_privkey.pem -out jwt_pubkey.pem
+ssh-keygen -t rsa -b 4096 -m PEM -f priv.key
+openssl rsa -in priv.key -pubout -outform PEM -out pub.key
 ```
