@@ -60,11 +60,11 @@ func (jwtInstance *JwtClass) VerifyJwt(pubKey string, tokenStr string, skipClaim
 }
 
 func (jwtInstance *JwtClass) MustVerifyJwt(pubKey string, tokenStr string, skipClaimsValidation bool) (bool, *jwt.Token, map[string]interface{}) {
-	valid, token, payload, err := jwtInstance.VerifyJwt(pubKey, tokenStr, skipClaimsValidation)
+	valid, token, body, err := jwtInstance.VerifyJwt(pubKey, tokenStr, skipClaimsValidation)
 	if err != nil {
 		panic(err)
 	}
-	return valid, token, payload
+	return valid, token, body
 }
 
 func (jwtInstance *JwtClass) DecodeBodyOfJwt(tokenStr string) (map[string]interface{}, *jwt.Token, error) {
