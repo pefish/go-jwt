@@ -6,7 +6,7 @@ import (
 	"crypto/rsa"
 	"crypto/x509"
 	"encoding/pem"
-	"github.com/dgrijalva/jwt-go"
+	"github.com/golang-jwt/jwt/v5"
 	"time"
 )
 
@@ -41,9 +41,10 @@ func (jwtInstance *JwtClass) MustGetJwt(privKey string, expireDuration time.Dura
 	return tokenString
 }
 
-func (jwtInstance *JwtClass) VerifyJwt(pubKey string, tokenStr string, skipClaimsValidation bool) (bool, *jwt.Token, error) {
-	parser := jwt.Parser{
-		SkipClaimsValidation: skipClaimsValidation,
+func (jwtInstance *JwtClass) VerifyJwt(pubKey string, tokenStr string, skipClaimsValidation bool) (bool, *jwt.Token, map[string]interface{}, error) {
+	parser := &jwt.Parser{}
+	if skipClaimsValidation {
+		parser = jwt.NewParser(jwt.WithoutClaimsValidation())
 	}
 	token, err := parser.Parse(tokenStr, func(token *jwt.Token) (interface{}, error) {
 		verifyKey, err := jwt.ParseRSAPublicKeyFromPEM([]byte(pubKey))
@@ -53,17 +54,17 @@ func (jwtInstance *JwtClass) VerifyJwt(pubKey string, tokenStr string, skipClaim
 		return verifyKey, nil
 	})
 	if err != nil {
-		return false, nil, err
+		return false, nil, nil, err
 	}
-	return token.Valid, token, nil
+	return token.Valid, token, token.Claims.(jwt.MapClaims), nil
 }
 
-func (jwtInstance *JwtClass) MustVerifyJwt(pubKey string, tokenStr string, skipClaimsValidation bool) (bool, *jwt.Token) {
-	valid, token, err := jwtInstance.VerifyJwt(pubKey, tokenStr, skipClaimsValidation)
+func (jwtInstance *JwtClass) MustVerifyJwt(pubKey string, tokenStr string, skipClaimsValidation bool) (bool, *jwt.Token, map[string]interface{}) {
+	valid, token, payload, err := jwtInstance.VerifyJwt(pubKey, tokenStr, skipClaimsValidation)
 	if err != nil {
 		panic(err)
 	}
-	return valid, token
+	return valid, token, payload
 }
 
 func (jwtInstance *JwtClass) DecodeBodyOfJwt(tokenStr string) (map[string]interface{}, *jwt.Token, error) {
