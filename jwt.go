@@ -10,12 +10,16 @@ import (
 	"time"
 )
 
-type JwtClass struct {
+type JwtType struct {
 }
 
-var Jwt = JwtClass{}
+var JwtInstance = JwtType{}
 
-func (jwtInstance *JwtClass) GetJwt(privKey string, expireDuration time.Duration, payload map[string]interface{}) (string, error) {
+func (j *JwtType) GetJwt(
+	privKey string,
+	expireDuration time.Duration,
+	payload map[string]interface{},
+) (string, error) {
 	token := jwt.New(jwt.GetSigningMethod("RS256"))
 	signKey, err := jwt.ParseRSAPrivateKeyFromPEM([]byte(privKey))
 	if err != nil {
@@ -33,15 +37,28 @@ func (jwtInstance *JwtClass) GetJwt(privKey string, expireDuration time.Duration
 	return tokenString, nil
 }
 
-func (jwtInstance *JwtClass) MustGetJwt(privKey string, expireDuration time.Duration, payload map[string]interface{}) string {
-	tokenString, err := jwtInstance.GetJwt(privKey, expireDuration, payload)
+func (j *JwtType) MustGetJwt(
+	privKey string,
+	expireDuration time.Duration,
+	payload map[string]interface{},
+) string {
+	tokenString, err := j.GetJwt(privKey, expireDuration, payload)
 	if err != nil {
 		panic(err)
 	}
 	return tokenString
 }
 
-func (jwtInstance *JwtClass) VerifyJwt(pubKey string, tokenStr string, skipClaimsValidation bool) (bool, *jwt.Token, map[string]interface{}, error) {
+func (j *JwtType) VerifyJwt(
+	pubKey string,
+	tokenStr string,
+	skipClaimsValidation bool,
+) (
+	isValid bool,
+	tokenObj *jwt.Token,
+	payload map[string]interface{},
+	err error,
+) {
 	parser := &jwt.Parser{}
 	if skipClaimsValidation {
 		parser = jwt.NewParser(jwt.WithoutClaimsValidation())
@@ -59,15 +76,27 @@ func (jwtInstance *JwtClass) VerifyJwt(pubKey string, tokenStr string, skipClaim
 	return token.Valid, token, token.Claims.(jwt.MapClaims), nil
 }
 
-func (jwtInstance *JwtClass) MustVerifyJwt(pubKey string, tokenStr string, skipClaimsValidation bool) (bool, *jwt.Token, map[string]interface{}) {
-	valid, token, body, err := jwtInstance.VerifyJwt(pubKey, tokenStr, skipClaimsValidation)
+func (j *JwtType) MustVerifyJwt(
+	pubKey string,
+	tokenStr string,
+	skipClaimsValidation bool,
+) (
+	isValid bool,
+	tokenObj *jwt.Token,
+	payload map[string]interface{},
+) {
+	valid, token, body, err := j.VerifyJwt(pubKey, tokenStr, skipClaimsValidation)
 	if err != nil {
 		panic(err)
 	}
 	return valid, token, body
 }
 
-func (jwtInstance *JwtClass) DecodeBodyOfJwt(tokenStr string) (map[string]interface{}, *jwt.Token, error) {
+func (j *JwtType) DecodeBodyOfJwt(tokenStr string) (
+	payload map[string]interface{},
+	tokenObj *jwt.Token,
+	err error,
+) {
 	claims := jwt.MapClaims{}
 	parser := jwt.Parser{}
 	token, _, err := parser.ParseUnverified(tokenStr, claims)
@@ -77,15 +106,19 @@ func (jwtInstance *JwtClass) DecodeBodyOfJwt(tokenStr string) (map[string]interf
 	return claims, token, nil
 }
 
-func (jwtInstance *JwtClass) MustDecodeBodyOfJwt(tokenStr string) (map[string]interface{}, *jwt.Token) {
-	result, token, err := jwtInstance.DecodeBodyOfJwt(tokenStr)
+func (j *JwtType) MustDecodeBodyOfJwt(tokenStr string) (payload map[string]interface{}, tokenObj *jwt.Token) {
+	result, token, err := j.DecodeBodyOfJwt(tokenStr)
 	if err != nil {
 		panic(err)
 	}
 	return result, token
 }
 
-func GeneRsaKeyPair() (string, string, error) {
+func GeneRsaKeyPair() (
+	privKey string,
+	pubKey string,
+	err error,
+) {
 	bits := 2048
 	privateKey, err := rsa.GenerateKey(rand.Reader, bits)
 	derStream := x509.MarshalPKCS1PrivateKey(privateKey)
