@@ -29,6 +29,8 @@ func TestJwtClass_GetJwt(t *testing.T) {
 
 func TestGeneRsaKeyPair(t *testing.T) {
 	pkey, pubkey, err := GeneRsaKeyPair()
+	fmt.Println(pkey)
+	fmt.Println(pubkey)
 	go_test_.Equal(t, nil, err)
 	go_test_.Equal(t, true, len(pkey) > 100)
 	go_test_.Equal(t, true, len(pubkey) > 100)
